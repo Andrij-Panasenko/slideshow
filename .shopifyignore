@@ -1,0 +1,5 @@
+.gitignore
+.idea
+templates/*.json
+sections/*.json
+config/settings_data.json
