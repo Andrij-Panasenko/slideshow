@@ -33,7 +33,9 @@ select {
   font: inherit;
 }
 
-
+a {
+  text-decoration: none;
+}
 
 p {
   text-wrap: pretty;

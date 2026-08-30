@@ -1,3 +1,7 @@
 :root {
 
 }
+
+.focus-visible:focus-visible {
+     outline: 1px solid #000000;
+}
