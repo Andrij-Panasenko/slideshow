@@ -1,0 +1,640 @@
+{{ 'slideshow.css' | asset_url | stylesheet_tag }}
+
+{% assign enable_autoplay = section.settings.enable_autoplay %} 
+{% assign autoplay_speed = section.settings.autoplay_speed %} 
+{% assign section_height = section.settings.slideshow_height %}
+
+<section class="slideshow js-slideshow" 
+  style="--section-height: {{ section_height | append: 'vh' }};" 
+  data-autoplay="{{ enable_autoplay }}" 
+  data-autoplay-speed="{{ autoplay_speed | append: '000' }}">
+  <div class="slideshow-container">
+    <div class="swiper">
+      <div class="swiper-wrapper">
+        {% if section.blocks.size > 0 %}
+          {% for block in section.blocks %}
+            {% assign slide_heading = block.settings.heading %}
+            {% assign slide_text = block.settings.text %}
+            {% assign button_label = block.settings.button_label %}
+            {% assign button_link = block.settings.button_link %}
+            {% assign alignment_desktop = block.settings.text_alignment_desktop  %}
+            {% assign alignment_mobile = block.settings.text_alignment_mobile | default: alignment_desktop %}
+            {% assign text_color = block.settings.text_color %}
+            {% assign button_label_color = block.settings.button_label_color %}
+            {% assign button_background = block.settings.button_background_color %}
+            {% assign button_label_hover = block.settings.button_label_color_hover %}
+            {% assign button_background_hover = block.settings.button_background_color_hover %}
+            {% assign overlay = block.settings.overlay %}
+
+            {% case block.type %}
+              {% when 'image' %}
+                {% assign desktop_image = block.settings.desktop_image %}
+                {% assign mobile_image = block.settings.mobile_image | default: desktop_image %}
+              {% when 'html_video' %}
+                {% assign desktop_html_video = block.settings.desktop_video %}
+                {% assign mobile_html_video = block.settings.mobile_video | default: desktop_html_video %}
+              {% when 'embed_video' %}
+                {% assign desktop_embed_video = block.settings.video_url_desktop %}
+                {% assign mobile_embed_video = block.settings.video_url_mobile | default: desktop_embed_video %}
+            {% endcase %}
+
+            {% capture styles %}
+              --text-color: {{ text_color }};
+              --button-label-color: {{ button_label_color }};
+              --button-background: {{ button_background }};
+              --button-label-color-hover: {{ button_label_hover }};
+              --button-background-hover: {{ button_background_hover }};
+              --overlay: {{ overlay }};
+              --alignment-desktop: {{ alignment_desktop }};
+              --alignment-mobile: {{ alignment_mobile }};
+            {% endcapture %}
+
+            {% case block.type %}
+              {% when 'image' %}
+                  <div class="swiper-slide slideshow__slide js-slide" style="{{- styles -}}">
+                    <div class="slideshow__image-container">
+                      {% if desktop_image != blank %}
+                        <picture>
+                          <source media="(max-width: 767px)" srcset="{{ mobile_image | image_url: width: '767px'}} 1x, {{ mobile_image | image_url: width: '1534px'}} 2x">
+                          <source media="(max-width: 991px)" srcset="{{ desktop_image | image_url: width: '991px' }} 1x, {{ desktop_image | image_url: width: '1982px' }} 2x">
+                          <img 
+                            class="slideshow__image" 
+                            src="{{ desktop_image | image_url: width: '1920px' }}" 
+                            srcset="{{ desktop_image | image_url: width: '1920px' }} 1x, {{ desktop_image | image_url: width: '3840px' }} 2x"
+                            alt="{{ desktop_image.alt }}">
+                        </picture>
+                      {% else %}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'slideshow__image' }}
+                      {% endif %}
+                    </div>
+                    <div class="slideshow__content">
+                      <div class="slideshow__content-alignment">
+                        {% if slide_heading != blank %}
+                          <h2 class="slideshow__content-heading">{{- slide_heading -}}</h2>
+                        {% endif %}
+  
+                        {% if slide_text != blank %}
+                          <p class="slideshow__content-text">{{- slide_text -}}</p>
+                        {% endif %}
+    
+                        {% if button_label != blank and button_link != blank %}
+                          <a href="{{ button_link }}" class="slideshow__content-button focus-visible">{{- button_label -}}</a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+              {% when 'html_video' %}
+                  <div class="swiper-slide slideshow__slide js-slide" style="{{- styles -}}">
+                    <div class="slideshow__video-container">
+                      {% if desktop_html_video != blank %}
+                        <video class="slideshow__video js-video" data-display="mobile" autoplay muted loop playsinline data-video="html-video">
+                          {% for source in mobile_html_video.sources %}
+                            <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                          {% endfor %}
+                        </video>
+  
+                        <video class="slideshow__video js-video" data-display="desktop" autoplay muted loop playsinline data-video="html-video">
+                          {% for source in desktop_html_video.sources %}
+                            <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                          {% endfor %}
+                        </video>
+                      {% else %}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'slideshow__video' }}
+                      {% endif %}
+                    </div>
+                    <div class="slideshow__content">
+                      <div class="slideshow__content-alignment">
+                        {% if slide_heading != blank %}
+                          <h2 class="slideshow__content-heading">{{- slide_heading -}}</h2>
+                        {% endif %}
+  
+                        {% if slide_text != blank %}
+                          <p class="slideshow__content-text">{{- slide_text -}}</p>
+                        {% endif %}
+    
+                        {% if button_label != blank and button_link != blank %}
+                          <a href="{{ button_link }}" class="slideshow__content-button focus-visible">{{- button_label -}}</a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+              {% when 'embed_video' %}
+                  <div class="swiper-slide slideshow__slide js-slide" style="{{- styles -}}">
+                    <div class="slideshow__video-container">
+                      {% if desktop_embed_video != blank %}
+                        {% if mobile_embed_video.type == 'youtube' %}
+                          {% assign video_url = "https://youtube.com/embed/" 
+                            | append: mobile_embed_video.id 
+                            | append: "?autoplay=1&mute=1&loop=1&playlist="
+                            | append: mobile_embed_video.id
+                            | append: "&controls=0&enablejsapi=1&playsinline=1" %}
+
+                          <iframe src="{{ video_url }}"
+                            class="js-video slideshow__video"
+                            frameborder="0" 
+                            title="{{ mobile_embed_video.alt }}"
+                            allowfullscreen 
+                            data-display="mobile"
+                          ></iframe>
+                        {% endif %}
+
+                        {% if desktop_embed_video.type == 'youtube' %}
+                          {% assign video_url = "https://youtube.com/embed/" 
+                            | append: desktop_embed_video.id 
+                            | append: "?autoplay=1&mute=1&loop=1&playlist="
+                            | append: desktop_embed_video.id
+                            | append: "&controls=0&enablejsapi=1&playsinline=1" %}
+
+                          <iframe src="{{ video_url }}"
+                            class="js-video slideshow__video"
+                            frameborder="0" 
+                            title="{{ desktop_embed_video.alt }}"
+                            allowfullscreen
+                            data-display="desktop" 
+                          ></iframe>
+                        {% endif %}
+                        
+                        {% if mobile_embed_video.type == 'vimeo' %}
+                          {% assign video_url = "https://player.vimeo.com/video/" 
+                            | append: mobile_embed_video.id 
+                            | append: "?autoplay=1&muted=1&loop=1&controls=0&api=1&playsinline=1" %}
+
+                          <iframe 
+                            class="js-video slideshow__video" 
+                            src="{{video_url }}" 
+                            frameborder="0" 
+                            allowfullscreen 
+                            data-display="mobile"></iframe>
+                        {% endif %}
+
+                        {% if desktop_embed_video.type == 'vimeo' %}
+                          {% assign video_url = "https://player.vimeo.com/video/" 
+                            | append: desktop_embed_video.id 
+                            | append: "?autoplay=1&muted=1&loop=1&controls=0&api=1&playsinline=1" %}
+
+                          <iframe 
+                            class="js-video slideshow__video" 
+                            src="{{ video_url }}" 
+                            frameborder="0" 
+                            allowfullscreen
+                            data-display="desktop" 
+                            ></iframe>
+                        {% endif %}
+  
+                      {% else %}
+                        {{ 'hero-apparel-3' | placeholder_svg_tag: 'slideshow__video' }}
+                      {% endif %}
+                    </div>
+                    <div class="slideshow__content">
+                      <div class="slideshow__content-alignment">
+                        {% if slide_heading != blank %}
+                          <h2 class="slideshow__content-heading">{{- slide_heading -}}</h2>
+                        {% endif %}
+  
+                        {% if slide_text != blank %}
+                          <p class="slideshow__content-text">{{- slide_text -}}</p>
+                        {% endif %}
+    
+                        {% if button_label != blank and button_link != blank %}
+                          <a href="{{ button_link }}" class="slideshow__content-button focus-visible">{{- button_label -}}</a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+            {% endcase %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      
+      <div class="js-button-slide-control">
+        <button type="button" class="slideshow__button-control swiper-button-prev-slide" aria-label="Go to previous slide">
+          {%- render 'icons', icon: 'arrow-left' -%}
+        </button>
+        <button type="button" class="slideshow__button-control swiper-button-next-slide" aria-label="Go to next slide">
+          {%- render 'icons', icon: 'arrow-right' -%}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ 'slideshow.js' | asset_url }}" type="module" defer></script>
+</section>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "disabled_on": {
+    "groups": ["footer", "header"]
+  },
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_autoplay",
+      "label": "Enable autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed",
+      "min": 3,
+      "max": 15,
+      "unit": "sec",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "slideshow_height",
+      "label": "Slideshow height",
+      "min": 30,
+      "max": 100,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Image",
+      "type": "image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "Image (desktop)"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Image (mobile)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_desktop",
+          "label": "Text alignment (desktop)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_mobile",
+          "label": "Text alignment (mobile)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color",
+          "label": "Button label",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color",
+          "label": "Button background",
+          "alpha": true,
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color_hover",
+          "label": "Button label (hover)",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color_hover",
+          "label": "Button background (hover)",
+          "alpha": true,
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "overlay",
+          "label": "Overlay",
+          "alpha": true,
+          "default": "#0000004D"
+        }
+      ]
+    },
+    {
+      "name": "HTML video",
+      "type": "html_video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "desktop_video",
+          "label": "Video (desktop)"
+        },
+        {
+          "type": "video",
+          "id": "mobile_video",
+          "label": "Video (mobile)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_desktop",
+          "label": "Text alignment (desktop)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_mobile",
+          "label": "Text alignment (mobile)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color",
+          "label": "Button label",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color",
+          "label": "Button background",
+          "alpha": true,
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color_hover",
+          "label": "Button label (hover)",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color_hover",
+          "label": "Button background (hover)",
+          "alpha": true,
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "overlay",
+          "label": "Overlay",
+          "alpha": true,
+          "default": "#0000004D"
+        }
+      ]
+    },
+    {
+      "name": "Embed video",
+      "type": "embed_video",
+      "settings": [
+        {
+          "type": "video_url",
+          "id": "video_url_desktop",
+          "accept": ["vimeo", "youtube"],
+          "label": "Video url (desktop)"
+        },
+        {
+          "type": "video_url",
+          "id": "video_url_mobile",
+          "accept": ["vimeo", "youtube"],
+          "label": "Video url (mobile)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_desktop",
+          "label": "Text alignment (desktop)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "select",
+          "id": "text_alignment_mobile",
+          "label": "Text alignment (mobile)",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ],
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color",
+          "label": "Button label",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color",
+          "label": "Button background",
+          "alpha": true,
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_label_color_hover",
+          "label": "Button label (hover)",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_background_color_hover",
+          "label": "Button background (hover)",
+          "alpha": true,
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "overlay",
+          "label": "Overlay",
+          "alpha": true,
+          "default": "#0000004D"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "html_video"
+        },
+        {
+          "type": "embed_video"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
