@@ -1,0 +1,96 @@
+{% schema %}
+{
+     "name": "Reviews",
+     "disabled_on": {
+          "groups": ["header", "footer"]
+     },
+     "settings": [
+          {
+               "type": "text",
+               "id": "section_heading",
+               "label": "Heading",
+               "default": "Reviews"
+          },
+          {
+               "type": "image_picker",
+               "id": "background_image_desktop",
+               "label": "Background image"
+          },
+          {
+               "type": "image_picker",
+               "id": "background_image_mobile",
+               "label": "Background image mobile"
+          },
+          {
+               "type": "header",
+               "content": "Colors",
+          },
+          {
+               "type": "color",
+               "alpha": true,
+               "id": "background_overlay",
+               "label": "Background overlay",
+               "default": "#232323B2"
+          },
+          {
+               "type": "color",
+               "id": "text_color",
+               "label": "Text",
+               "default": "#FFFFFF"
+          },
+          {
+               "type": "color",
+               "id": "author_color",
+               "label": "Author role",
+               "default": "#A1A1A1"
+          },
+     ],
+     "blocks": [
+          {
+               "name": "Review",
+               "type": "review",
+               "settings": [
+                    {
+                         "type": "image_picker",
+                         "id": "image",
+                         "label": "Image"
+                    },
+                    {
+                         "type": "text",
+                         "id": "author_name",
+                         "label": "Author name",
+                         "default": "Author name"
+                    },
+                    {
+                         "type": "text",
+                         "id": "author_role",
+                         "label": "Author role",
+                         "default": "Author role",
+                    },
+                    {
+                         "type": "textarea",
+                         "id": "text",
+                         "label": "Text",
+                         "default": "Review text"
+                    }
+               ]
+          }
+     ],
+     "presets": [
+          {
+               "name": "Reviews",
+               "blocks": [
+                    {
+                         "type": "review",
+                    },
+                    {
+                         "type": "review",
+                    },
+                    {
+                         "type": "review",
+                    },
+               ]
+          }
+     ]
+}
+{% endschema %}
