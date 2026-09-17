@@ -1,0 +1,235 @@
+{% assign title = section.settings.section_heading %}
+{% assign background_image_desktop = section.settings.background_image_desktop %}
+{% assign background_image_mobile = section.settings.background_image_mobile | default: background_image_desktop %}
+{% assign background_overlay = section.settings.background_overlay %}
+{% assign text_color = section.settings.text_color %}
+{% assign author_color = section.settings.author_color %}
+
+{{ 'reviews.css' | asset_url |stylesheet_tag }}
+
+{% capture styles %}
+     --section-background-overlay: {{ background_overlay }}; 
+     --text-color: {{ text_color }};
+     --author-role-text-color: {{  author_color }};
+{% endcapture %}
+
+<section class="reviews js-reviews" style="{{ styles }}">
+     {% if title != blank %}
+          <h2 class="reviews__section-title">{{ title }}</h2>
+     {% endif %}
+     <div class="reviews-container">
+          <div class="reviews__overlay"></div>
+
+          {% if background_image_desktop != blank %}
+               <picture>
+                    <source media="(max-width: 767px)" 
+                         srcset="
+                         {{ background_image_desktop | image_url: width: '711px'}} 1x, 
+                         {{ background_image_desktop | image_url: width: '1422px'}} 2x">
+                    <source media="(max-width: 991px)" 
+                         srcset="
+                         {{ background_image_mobile | image_url: width: '935px' }} 1x, 
+                         {{ background_image_mobile | image_url: width: '1870px' }} 2x">
+                    <img src="{{ background_image_desktop | image_url: width: '1870px'}}" 
+                         alt="{{ background_image_desktop.alt }}"
+                         class="reviews__background-image"
+                    >
+               </picture>
+          {% endif %}
+
+          <div class="reviews__slider">
+                <div class="swiper reviews__swiper-media js-swiper-media">
+                    <div class="swiper-wrapper">
+                         {% for block in section.blocks %}
+                              {% assign review_image = block.settings.image %}
+
+                              <div class="swiper-slide">
+                                   <div class="reviews__review-image-wrapper">
+                                        {% if review_image != blank %}
+                                             <picture class="reviews__review-media">
+                                                  <source media="(max-width: 767px)" 
+                                                       srcset=" {{ review_image | image_url: width: '711px' }} 1x, {{ review_image | image_url: width: '1422px' }} 2x">
+                                                  <source media="(max-width: 991px)" 
+                                                       srcset=" {{ review_image | image_url: width: '935px' }} 1x, {{ review_image | image_url: width: '1870px' }} 2x">
+                                                  <img src="{{ review_image | image_url: width: '1864px' }}"
+                                                       srcset="{{ review_image | image_url: width: '1864px' }} 1x, {{ review_image | image_url: width: '3728px' }} 2x" 
+                                                       alt="{{ review_image.alt }}"
+                                                       class="reviews__image"
+                                                  >
+                                             </picture>
+                                        {% else %}
+                                             <div class="reviews__review-media">
+                                                  {{ 'detailed-apparel-1' | placeholder_svg_tag: 'reviews__image' }}
+                                             </div>
+                                        {% endif %}
+                                   </div>
+                              </div>
+                         {% endfor %}
+                         
+                    </div>
+                </div>
+
+               <div class="swiper reviews__swiper-text js-swiper-text">
+                   <div class="swiper-wrapper">
+                        {% for block in section.blocks %}
+                             {% assign text_review = block.settings.text %}
+                             <div class="swiper-slide">
+                                  <div class="reviews__review-text-wrapper">
+                                       <p class="reviews__rewiew-text">{{ text_review }}</p>
+                                  </div>
+                             </div>
+                        {% endfor %}
+                   </div>
+                   
+                   <div class="reviews-navigation__wrapper">
+                         <div class="reviews-navigation">
+                              <button type="button" 
+                                   class="button reviews-navigation__slide-button swiper-prev js-button-prev"
+                                   aria-label="scroll to the previous review"
+                              >
+                                   {% render 'icons', icon: 'arrow-left' %}
+                              </button>
+          
+                              {% for block in section.blocks %}
+                                   {% assign author_name = block.settings.author_name %}
+                                   {% assign author_role = block.settings.author_role %}
+                                   {% assign author_image = block.settings.image %}
+          
+                                   <div class="reviews-navigation__author {% if forloop.index == 1 %}is-active{% endif %} js-navigation-author">
+                                        <div class="reviews-navigation__author-image-wrapper">
+                                             {% if author_image != blank %}
+                                                  <picture>
+                                                       <source media="(max-width: 767px)" 
+                                                            srcset="{{ author_image | image_url: width: '48px' }} 1x, {{ author_image | image_url: width: '96px' }} 2x">
+                                                       <source media="(max-width: 991px)" 
+                                                            srcset="{{ author_image | image_url: width: '56px' }} 1x, {{ author_image | image_url: width: '112px' }} 2x">
+                                                  </picture>
+                                                  <img src="{{ author_image | image_url: width: '56px' }}"
+                                                       srcset="{{ author_image | image_url: width: '56px' }} 1x, {{ author_image | image_url: width: '112px' }} 2x" 
+                                                       alt="{{ author_image.alt }}" 
+                                                       class="reviews-navigation__author-image">
+                                             {% else %}
+                                                  {{ 'product-apparel-1' | placeholder_svg_tag: 'reviews-navigation__author-image' }}
+                                             {% endif %}
+                                        </div>
+          
+                                        <div class="reviews-navigation__author-info">
+                                             <p class="reviews-navigation__author-name">{{ author_name }}</p>
+                                             <span class="reviews-navigation__author-role">{{ author_role }}</span>
+                                        </div>
+                                   </div>
+                              {% endfor %}
+                              
+                              <button type="button" 
+                                   class="button reviews-navigation__slide-button swiper-next js-button-next"
+                                   aria-label="scroll to the next review"
+                              >
+                                   {% render 'icons', icon: 'arrow-right' %}
+                              </button>
+                         </div>
+                   </div>
+               </div>
+               
+          </div>
+          
+     </div>
+
+     <script src="{{ "reviews.js" | asset_url }}" type="module" defer></script>
+</section>
+
+{% schema %}
+{
+     "name": "Reviews",
+     "disabled_on": {
+          "groups": ["header", "footer"]
+     },
+     "settings": [
+          {
+               "type": "text",
+               "id": "section_heading",
+               "label": "Heading",
+               "default": "Reviews"
+          },
+          {
+               "type": "image_picker",
+               "id": "background_image_desktop",
+               "label": "Background image"
+          },
+          {
+               "type": "image_picker",
+               "id": "background_image_mobile",
+               "label": "Background image mobile"
+          },
+          {
+               "type": "header",
+               "content": "Colors",
+          },
+          {
+               "type": "color",
+               "alpha": true,
+               "id": "background_overlay",
+               "label": "Background overlay",
+               "default": "#232323B2"
+          },
+          {
+               "type": "color",
+               "id": "text_color",
+               "label": "Text",
+               "default": "#FFFFFF"
+          },
+          {
+               "type": "color",
+               "id": "author_color",
+               "label": "Author role",
+               "default": "#A1A1A1"
+          },
+     ],
+     "blocks": [
+          {
+               "name": "Review",
+               "type": "review",
+               "settings": [
+                    {
+                         "type": "image_picker",
+                         "id": "image",
+                         "label": "Image"
+                    },
+                    {
+                         "type": "text",
+                         "id": "author_name",
+                         "label": "Author name",
+                         "default": "Author name"
+                    },
+                    {
+                         "type": "text",
+                         "id": "author_role",
+                         "label": "Author role",
+                         "default": "Author role",
+                    },
+                    {
+                         "type": "textarea",
+                         "id": "text",
+                         "label": "Text",
+                         "default": "Review text"
+                    }
+               ]
+          }
+     ],
+     "presets": [
+          {
+               "name": "Reviews",
+               "blocks": [
+                    {
+                         "type": "review",
+                    },
+                    {
+                         "type": "review",
+                    },
+                    {
+                         "type": "review",
+                    },
+               ]
+          }
+     ]
+}
+{% endschema %}
